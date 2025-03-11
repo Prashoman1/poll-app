@@ -2,6 +2,8 @@
 import * as React from "react";
 import { RxCross1 } from "react-icons/rx";
 import { GoPlus } from "react-icons/go";
+import { v4 as uuidv4 } from 'uuid'
+import { CreatePollApi } from "../../services/Poll";
 
 const PollFormDesign = () => {
   const [choice, setChoice] = React.useState("");
@@ -13,6 +15,8 @@ const PollFormDesign = () => {
       },
     ],
     expireTime: "",
+    visibility: "",
+    userId:""
   });
 
   const handleOptions = () => {
@@ -27,20 +31,45 @@ const PollFormDesign = () => {
     });
   };
 
-  const handleSubmit = (e:any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
-    if(choice === "yes-no"){
-        formValues.options = [
-            {
-                text: "Yes",
-            },
-            {
-                text: "No",
-            },
-        ];
+    if (choice === "yes-no") {
+      formValues.options = [
+        { text: "Yes" },
+        { text: "No" },
+      ];
+      // formValues.options.push({ text: "Yes" }, { text: "No" });
     }
 
-    console.log(formValues);
+    if(formValues.visibility == "private"){
+      let userId = "";
+      const storedUserId = localStorage.getItem("userId");
+      if (storedUserId) {
+        userId = storedUserId;
+      } else {
+        userId = uuidv4();
+        localStorage.setItem("userId", userId);
+      }
+      formValues.userId = userId;
+      
+    }
+
+    try {
+      const data = {
+        question: formValues.question,
+        options: formValues.options,
+        expiresAt: formValues.expireTime,
+        pollType: formValues.visibility,
+        userId: formValues.userId
+      }
+      console.log({data});
+      
+      const res = await CreatePollApi(data);
+      console.log(res);
+      
+    } catch (error) {
+      
+    }
   };
 
   return (
@@ -48,13 +77,12 @@ const PollFormDesign = () => {
       <div className="min-h-screen flex items-center justify-center p-4 bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-white">
         <div className="w-full max-w-md mx-auto p-6 border rounded-lg shadow-lg border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-800">
           <div className="flex justify-center items-center mb-4">
-            <h1 className="text-2xl font-bold text-center">A Simple Polls Create</h1>
+            <h1 className="text-2xl font-bold text-center">
+              A Simple Polls Create
+            </h1>
           </div>
 
-          <form
-            className="space-y-4"
-            onSubmit={handleSubmit}
-          >
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <label
               htmlFor="question"
               className="block text-sm font-medium text-gray-700 dark:text-gray-300"
@@ -67,8 +95,8 @@ const PollFormDesign = () => {
               required
               className="w-full px-3 py-2 border rounded-lg bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white"
               placeholder="Enter your question"
-              // value={question}
-              // onChange={(e) => setQuestion(e.target.value)}
+              value={formValues.question}
+              onChange={(e)=> setFormValues({...formValues, question: e.target.value})}
             />
 
             <label
@@ -84,7 +112,7 @@ const PollFormDesign = () => {
               value={choice}
               onChange={(e) => setChoice(e.target.value)}
             >
-              <option disabled>Select a choice</option>
+              <option >Select a choice</option>
               <option value="yes-no">Yes/No</option>
               <option value="multiple-choice">Multiple-Choice</option>
             </select>
@@ -159,6 +187,47 @@ const PollFormDesign = () => {
                 })
               }
             />
+
+            <div className="flex items-center space-x-6">
+              {/* Public Option */}
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="visibility"
+                  value="public"
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                  onChange={(e) =>
+                    setFormValues({
+                      ...formValues,
+                      visibility: e.target.value,
+                    })
+                  }
+                />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Public
+                </span>
+              </label>
+
+              {/* Private Option */}
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="visibility"
+                  value="private"
+                  className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                  onChange={(e) =>
+                    setFormValues({
+                      ...formValues,
+                      visibility: e.target.value,
+                    })
+                  }
+                />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Private
+                </span>
+              </label>
+            </div>
+
             <button
               type="submit"
               className="w-full px-4 py-2 font-semibold rounded bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-700 dark:hover:bg-blue-800"
