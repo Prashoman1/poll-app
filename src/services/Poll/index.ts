@@ -1,38 +1,42 @@
 "use server";
-import axios from 'axios';
-import { envConfig } from '../../config';
-import { revalidateTag } from 'next/cache';
+
+import { envConfig } from "../../config";
+import { revalidateTag } from "next/cache";
+import axiosInstance from "../../lib/AxiosInstance";
 
 export const CreatePollApi = async (data: any) => {
   try {
-    const response = await axios.post(`${envConfig.apiUrl}/poll/create`, data);
+    const response = await axiosInstance.post(`/poll/create`, data);
     revalidateTag("polls");
     return response.data;
   } catch (error) {
     return error;
   }
 };
-export const InsertAnswerPollApi = async (data: any,slug:string) => {
+export const InsertAnswerPollApi = async (data: any, slug: string) => {
   try {
-    const response = await axios.patch(`${envConfig.apiUrl}/polls/${slug}`,data);
+    const response = await axiosInstance.patch(`/polls/${slug}`, data);
     revalidateTag("polls");
     return response.data;
   } catch (error) {
     return error;
   }
 };
-export const InsertReactionPollApi = async (data: any,slug:string) => {
+export const InsertReactionPollApi = async (data: any, slug: string) => {
   try {
-    const response = await axios.patch(`${envConfig.apiUrl}/polls-reactions/${slug}`,data);
+    const response = await axiosInstance.patch(
+      `/polls-reactions/${slug}`,
+      data
+    );
     revalidateTag("polls");
     return response.data;
   } catch (error) {
     return error;
   }
 };
-export const InsertCommentPollApi = async (data: any,slug:string) => {
+export const InsertCommentPollApi = async (data: any, slug: string) => {
   try {
-    const response = await axios.patch(`${envConfig.apiUrl}/polls-comment/${slug}`,data);
+    const response = await axiosInstance.patch(`/polls-comment/${slug}`, data);
     revalidateTag("polls");
     return response.data;
   } catch (error) {
@@ -40,26 +44,25 @@ export const InsertCommentPollApi = async (data: any,slug:string) => {
   }
 };
 
-export const GetPrivatePolls = async (userId:string)=>{
+export const GetPrivatePolls = async (userId: string) => {
   try {
-    const response = await axios.get(`${envConfig.apiUrl}/pollsByUser/${userId}`);
+    const response = await axiosInstance.get(`/pollsByUser/${userId}`);
     return response.data;
   } catch (error) {
     return error;
   }
-}
+};
 
-export const GetSinglePoll = async (slug:string)=>{
+export const GetSinglePoll = async (slug: string) => {
   try {
-    const response = await axios.get(`${envConfig.apiUrl}/polls/${slug}`);
+    const response = await axiosInstance.get(`/polls/${slug}`);
     return response.data;
   } catch (error) {
     return error;
   }
-}
+};
 
-
-export const getAllPublicPolls= async () => {
+export const getAllPublicPolls = async () => {
   try {
     const fetchOption = {
       next: {
@@ -68,7 +71,6 @@ export const getAllPublicPolls= async () => {
     };
     const res = await fetch(`${envConfig.apiUrl}/polls`, {
       ...fetchOption,
-      
     });
     if (!res.ok) {
       throw new Error("Failed to fetch data");
