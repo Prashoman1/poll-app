@@ -1,10 +1,13 @@
 import React from 'react';
 import PollList from '../../../components/ui/PollList';
 
-const page = () => {
+import { getAllPublicPolls } from '../../../services/Poll';
+
+const page = async() => {
+    const res = await getAllPublicPolls();
     return (
         <>
-            <PollList/>
+            <PollList data={res?.data}/>
         </>
     );
 };

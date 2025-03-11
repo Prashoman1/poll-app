@@ -4,9 +4,12 @@ import { RxCross1 } from "react-icons/rx";
 import { GoPlus } from "react-icons/go";
 import { v4 as uuidv4 } from 'uuid'
 import { CreatePollApi } from "../../services/Poll";
+import { toast } from "react-toastify";
+import LoadingApi from "../shared/LoadingApi";
 
 const PollFormDesign = () => {
   const [choice, setChoice] = React.useState("");
+  const [loading , setLoading] = React.useState(false);
   const [formValues, setFormValues] = React.useState({
     question: "",
     options: [
@@ -33,6 +36,7 @@ const PollFormDesign = () => {
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    setLoading(true);
     if (choice === "yes-no") {
       formValues.options = [
         { text: "Yes" },
@@ -65,16 +69,34 @@ const PollFormDesign = () => {
       console.log({data});
       
       const res = await CreatePollApi(data);
-      console.log(res);
+      console.log({res});
       
+      if(res?.success){
+        toast.success(res?.message);
+        setFormValues({
+          question: "",
+          options: [
+            {
+              text: "",
+            },
+          ],
+          expireTime: "",
+          visibility: "",
+          userId:""
+        })
+      }else{
+        toast.error(res?.response?.data?.message);
+      }
     } catch (error) {
-      
+      console.log(error);
+    }finally{
+      setLoading(false);
     }
   };
 
   return (
     <>
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-white">
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-white relative">
         <div className="w-full max-w-md mx-auto p-6 border rounded-lg shadow-lg border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-800">
           <div className="flex justify-center items-center mb-4">
             <h1 className="text-2xl font-bold text-center">
@@ -112,7 +134,7 @@ const PollFormDesign = () => {
               value={choice}
               onChange={(e) => setChoice(e.target.value)}
             >
-              <option >Select a choice</option>
+              <option value="">Select a choice</option>
               <option value="yes-no">Yes/No</option>
               <option value="multiple-choice">Multiple-Choice</option>
             </select>
@@ -230,12 +252,16 @@ const PollFormDesign = () => {
 
             <button
               type="submit"
+              disabled={loading}
               className="w-full px-4 py-2 font-semibold rounded bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-700 dark:hover:bg-blue-800"
             >
               Submit
             </button>
           </form>
         </div>
+        {
+          loading && <LoadingApi/>
+        }
       </div>
     </>
   );

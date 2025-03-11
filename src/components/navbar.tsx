@@ -1,4 +1,5 @@
-import React from "react";
+"use client"
+import React, { useEffect } from "react";
 import {
   Navbar as HeroUINavbar,
   NavbarContent,
@@ -14,16 +15,18 @@ import { Link } from "@heroui/link";
 import { link as linkStyles } from "@heroui/theme";
 import NextLink from "next/link";
 import clsx from "clsx";
-
-
-
-
 import { siteConfig } from "../config/site";
 import { ThemeSwitch } from "../components/theme-switch";
-
-
-
 export const Navbar = () => {
+  const [user, setUser] = React.useState<string | null>(null)
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+      setUser(userId);
+    } else {
+      setUser(null);
+    }
+  }, []);
   return (
     <HeroUINavbar maxWidth="xl" position="sticky">
       <NavbarContent className="" justify="start">
@@ -50,6 +53,18 @@ export const Navbar = () => {
               </NextLink>
             </NavbarItem>
           ))}
+          {
+            user && <NextLink
+            className={clsx(
+              linkStyles({ color: "foreground" }),
+              "data-[active=true]:text-primary data-[active=true]:font-medium"
+            )}
+            color="foreground"
+            href='/privacy-polls'
+          >
+            Private Polls
+          </NextLink>
+          }
         </ul>
       </NavbarContent>
 
